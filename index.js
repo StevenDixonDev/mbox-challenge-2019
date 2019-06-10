@@ -4,21 +4,21 @@ const fs = require('fs');
   All Inbox, LLC - Summer Coding Challenge 2019
   Author - Steven Dixon
   Email - StevenDixon1128@gmail.com
-
+  ---------------------------------------------
   This entry is my attemp at solving the issue outlined here (https://allinboxchallenge0619.splashthat.com)
   The entry point is located at the end of the file
 */
 
-// Function to load data using fs accepts a callback to start processing data
-function loadDataFromFile(file, callback) {
-  return fs.readFile(file, 'utf8', callback);
+// Function to load data using fs using a file location
+function loadDataFromFile(file) {
+  return fs.readFile(file, 'utf8', asyncCallbackHandle);
 }
 
-// Function to save data to file using fs
+// Function to save data to file using fs 
 function saveDatatoFile(file, data) {
   return fs.writeFile(file, data, (err) => {
     if (err) throw 'There was an issue saving the file please, check that the file is not in use or specify another file.';
-    console.log("Successfully Written to File.");
+    console.log("Successfully Written Data to File.");
   });
 }
 
@@ -30,12 +30,12 @@ function processLoadedData(dataFromFile) {
    FormatChunks accepts an array of strings and returns a formatted array of strings
    Create a promise in the case that formatting takes a while due to large arrays
   */
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const formattedData = combineChunks(formatChunks(splitIntoChunks(dataFromFile)));
     // Check for issues while formatting data
-    if (formattedData.lenght === 0 || !formattedData) {
+    if (formattedData.length === 0 || !formattedData) {
       // Reject if any are found
-      reject();
+      throw 'Issue with formatting data, please check that file is not empty or exists.';
     } else {
       // Resolve if no issues are found
       resolve(formattedData);
@@ -95,12 +95,18 @@ async function asyncCallbackHandle(err, loadedData) {
   //  Handle error from loadDataFrom File
   if (err) throw 'There was an issue loading the specified file, please check the file exists and try again.'
   else {
-    const output = await processLoadedData(loadedData);
-    await saveDatatoFile('output.full', output);
+    try{
+      const output = await processLoadedData(loadedData);
+      await saveDatatoFile('output.full', output);
+      return true;
+    }catch(err){
+      console.log(err)
+      return false;
+    }
   }
 }
 
 // Entry point Starts when 
-loadDataFromFile('./mbox.full', asyncCallbackHandle);
+loadDataFromFile('./mbox.full');
 
 module.exports = { loadDataFromFile }
