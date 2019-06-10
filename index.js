@@ -6,12 +6,25 @@ const fs = require('fs');
   Email - StevenDixon1128@gmail.com
   ---------------------------------------------
   This entry is my attemp at solving the issue outlined here (https://allinboxchallenge0619.splashthat.com)
-  The entry point is located at the end of the file
 */
 
 // Function to load data using fs using a file location
 function loadDataFromFile(file) {
   return fs.readFile(file, 'utf8', asyncCallbackHandle);
+}
+
+// Use async function so that nothing is blocked during loading or formatting
+async function asyncCallbackHandle(err, loadedData) {
+  //  Handle error from loadDataFrom File
+  if (err) throw 'There was an issue loading the specified file, please check the file exists and try again.'
+  else {
+    try{
+      const output = await processLoadedData(loadedData);
+      await saveDatatoFile('output.full', output);
+    }catch(err){
+      console.log(err);
+    }
+  }
 }
 
 // Function to save data to file using fs 
@@ -28,7 +41,7 @@ function processLoadedData(dataFromFile) {
    Use a function to split the loaded data into an array of chunks
    SplitIntoChunks accepts a string and returns an array of strings
    FormatChunks accepts an array of strings and returns a formatted array of strings
-   Create a promise in the case that formatting takes a while due to large arrays
+   return a promise in the case that formatting takes a while due to large arrays
   */
   return new Promise((resolve) => {
     const formattedData = combineChunks(formatChunks(splitIntoChunks(dataFromFile)));
@@ -88,22 +101,6 @@ function replaceTextInBody(textItem) {
 // Function reverse lines text in the body
 function reverseEmailBody(regexMatch) {
   return regexMatch.split(/\n/).reverse().join('\n');
-}
-
-// Use async function so that nothing is blocked during loading or formatting
-async function asyncCallbackHandle(err, loadedData) {
-  //  Handle error from loadDataFrom File
-  if (err) throw 'There was an issue loading the specified file, please check the file exists and try again.'
-  else {
-    try{
-      const output = await processLoadedData(loadedData);
-      await saveDatatoFile('output.full', output);
-      return true;
-    }catch(err){
-      console.log(err)
-      return false;
-    }
-  }
 }
 
 // Entry point Starts when 
